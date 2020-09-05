@@ -51,6 +51,7 @@ export default {
     },
   },
   methods: {
+    /* Emitting event from child to parent */
     selectUserToChat: function (user) {
       this.$emit("user-selected", user);
     },

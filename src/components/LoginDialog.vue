@@ -44,6 +44,7 @@ export default {
     },
   },
   methods: {
+    /* Emitting event from child to parent */
     setUser: function () {
       this.$emit("set-user", this.user);
       this.loginDialog = false;

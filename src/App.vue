@@ -67,10 +67,11 @@ export default {
     window.addEventListener("beforeunload", this.beforeWindowUnload);
   },
   mounted() {
-    this.setSocketio();
-    this.onResize();
+    this.setSocketio(); // Setting initial socket.io-client setup
+    this.onResize(); // To get width screen for offset value to autoscrolling on text
   },
   watch: {
+    /* Watching to scroll to bottom chat list*/
     messagesList: function (val) {
       if (val.length > 0)
         setTimeout(() => {
@@ -91,6 +92,8 @@ export default {
         easing: this.easing,
       };
     },
+
+    /*Filter messages according chat members*/
     messagesList: function () {
       return this.messages.filter(
         (message) =>
@@ -100,6 +103,8 @@ export default {
             message.userSelected == this.user)
       );
     },
+
+    /*Filter users from current user dictionary to show online users */
     usersList: function () {
       return Object.fromEntries(
         Object.entries(this.users).filter(([, user]) => user != this.user)
@@ -139,12 +144,16 @@ export default {
         this.chatAlert = true;
       });
     },
+
+    /* Method executed when user is logged in and register in socket instance*/
     setUser: function (user) {
       this.user = user;
       this.socket.emit("LOG_IN", {
         user,
       });
     },
+
+    /* Set active chatting user and emit room switch */
     selectUserToChat: function (user) {
       this.userSelected = user;
 
@@ -152,6 +161,8 @@ export default {
 
       this.socket.emit("CHANGE_ROOM", user);
     },
+
+    /* Message sender */
     sendMessage: function (message) {
       this.socket.emit("SEND_MESSAGE", {
         user: this.user,
@@ -159,6 +170,8 @@ export default {
         userSelected: this.userSelected,
       });
     },
+
+    /* Handling disconnect event on close browser window or tab */
     beforeWindowUnload: function () {
       if (this.user) {
         this.socket.emit("DISCONNECT", {
@@ -166,10 +179,13 @@ export default {
         });
       }
     },
+
     onResize: function () {
       this.offset = window.innerWidth;
     },
   },
+
+  /* Destroying listeners */
   beforeDestroy: function () {
     window.removeEventListener("beforeunload", this.beforeWindowUnload);
     window.removeEventListener("resize", this.onResize);

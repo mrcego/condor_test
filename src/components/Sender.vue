@@ -35,10 +35,14 @@ export default {
   }),
   watch: {
     userSelected: function (val) {
+      /* Set input focus when user select a online user to chat */
+
       if (val) setTimeout(() => this.$refs.message.focus());
     },
   },
   methods: {
+    /* Emitting event from child to parent and set focus to input */
+
     sendMessage: function () {
       this.$emit("send-message", this.message);
       this.message = "";

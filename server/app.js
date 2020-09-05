@@ -25,52 +25,46 @@ const server = app.listen(app.get("port"), () => {
   console.log("Server listening on port " + app.get("port"));
 });
 
+//Initializing socket.io instance
 const io = require("socket.io")(server, {
   pingTimeout: 7000,
   pingInterval: 3000,
 });
 
+/* Needed to separate rooms. 'Default' is the lobby room. */
 let rooms = [],
   users = {},
-  currentRoom = "default",
-  currentUserRecep = null;
+  currentRoom = "default";
 
 io.on("connection", function (socket) {
+  /* Setting first socket data for logged in user */
   socket.on("LOG_IN", function ({ user }) {
     socket.user = user;
     users[user] = user;
-    console.log(users);
     socket.room = currentRoom;
     rooms[user] = "room-" + user;
     socket.join(rooms[user]);
-    socket.broadcast.to(rooms[user]);
-    // .emit("UPDATE_CHAT", "SERVER", user + " está en línea contigo!");
-    console.log(socket.user);
 
     io.emit("USER_LOGGED_IN", { user, users });
   });
+
+  /* Emitting messages and room receptor respectively */
   socket.on("SEND_MESSAGE", function (data) {
-    io.sockets
-      .in(socket.room)
-      .emit("UPDATE_CHAT", socket.user, data.message, currentUserRecep);
     io.emit("MESSAGE", data);
   });
+
+  /* Updating room on switch at moment to select a new user */
   socket.on("CHANGE_ROOM", function (user) {
-    currentUserRecep = user;
-    console.log(socket.user);
     currentRoom = "room-" + user;
     socket.leave(socket.room);
     socket.join(currentRoom);
     socket.room = currentRoom;
-    // socket.emit("UPDATE_CHAT", "SERVER", "Has iniciado un chat con " + user);
-    // socket.broadcast
-    //   .to(currentRoom)
-    //   .emit("UPDATE_CHAT", "SERVER", socket.user + " está en línea contigo!");
   });
 
+  /* Handling disconnect event */
   socket.on("DISCONNECT", function () {
     delete users[socket.user];
-    io.sockets.emit("UPDATE_USERS", users);
+    io.emit("UPDATE_USERS", users);
     socket.broadcast.emit("DISCONNECT_CHAT", socket.user);
     socket.leave(socket.room);
   });

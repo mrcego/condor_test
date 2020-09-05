@@ -46,4 +46,4 @@ npm run dev
 
 ### Compiles and minifies for production
 
-There is a "production" version in [Heroku] (https://chat-condor.herokuapp.com/)
+There is a "production" version in [Heroku](https://chat-condor.herokuapp.com/)
